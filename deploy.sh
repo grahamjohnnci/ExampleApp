@@ -1,14 +1,32 @@
 #!/usr/bin/env bash
-sudo apt update && sudo apt install nodejs npm
-#Install pm2 which is a production process manager for Node.js with a built-in load balancer.
-sudo npm install -g pm2
-#Stop any instance of the application currently running.
-pm2 stop example_app
-#Change directory into the folder where the application was downloaded.
-cd ExampleApp/
-#Install the dependencies of the application.
-npm install
+#Check if there is an instance running with the image name that we are deploying
+CURRENT_INSTANCE=$(docker ps -a -q --filter ancestor="$IMAGE_NAME" --format="{{.ID}}")
+
+#If an instance does exist, stop that instance
+i f[ "$CURRENT_INSTANCE" ]
+then
+	docker rm $(docker stop $CURRENT_INSTANCE)
+fi
+
+#Pull down the instance from dockerhub
+docker pull $IMAGE_NAME
+
+#Check if a docker container exists with the name of node_app; if it does, then remove that container
+CONTAINER_EXISTS=$(docker ps -a | grep node_app)
+if [ "$CONTAINER_EXISTS" ]
+then
+	docker rm node_app
+fi
+
+#Create a container called node_app that is available on port 8443 from our docker image
+docker create -p 8443:8443 --name node_app $IMAGE_NAME
+#Write the private key to a file
 echo $PRIVATE_KEY > privatekey.pem
+#Wrtie the server key to a fiile
 echo $SERVER > server.crt
-#Start the application with the process name example_app using pm2
-pm2 start ./bin/www --name example_app
+#Add the private key to the node_app docker container
+docker cp ./privatekey.pem node_app:/privatekey.pem
+#Add the server key to the node_app docker container
+docker cp ./server.crt node_app:/server.crt
+#Start the node_app container
+docker start node_app
