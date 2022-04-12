@@ -5,7 +5,7 @@ CURRENT_INSTANCE=$(docker ps -a -q --filter ancestor="$IMAGE_NAME" --format="{{.
 #If an instance does exist, stop that instance
 if [ "$CURRENT_INSTANCE" ];
 then
-	docker rm $(docker stop $CURRENT_INSTANCE)
+  docker rm $(docker stop $CURRENT_INSTANCE)
 fi
 
 #Pull down the instance from dockerhub
@@ -15,7 +15,7 @@ docker pull $IMAGE_NAME
 CONTAINER_EXISTS=$(docker ps -a | grep node_app)
 if [ "$CONTAINER_EXISTS" ];
 then
-	docker rm node_app
+  docker rm node_app
 fi
 
 #Create a container called node_app that is available on port 8443 from our docker image
