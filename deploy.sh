@@ -3,7 +3,7 @@
 CURRENT_INSTANCE=$(docker ps -a -q --filter ancestor="$IMAGE_NAME" --format="{{.ID}}")
 
 #If an instance does exist, stop that instance
-if [ "$CURRENT_INSTANCE" ];
+if [ "$CURRENT_INSTANCE" ]
 then
   docker rm $(docker stop $CURRENT_INSTANCE)
 fi
@@ -11,22 +11,22 @@ fi
 #Pull down the instance from dockerhub
 docker pull $IMAGE_NAME
 
-#Check if a docker container exists with the name of $CONTAINER_NAME; if it does, then remove that container
-CONTAINER_EXISTS=$(docker ps -a | grep $CONTAINER_NAME)
-if [ "$CONTAINER_EXISTS" ];
+#Check if a docker container exists with the name of node_app; if it does, then remove that container
+CONTAINER_EXISTS=$(docker ps -a | grep node_app)
+if [ "$CONTAINER_EXISTS" ]
 then
-  docker rm $CONTAINER_NAME
+  docker rm node_app
 fi
 
-#Create a container called $CONTAINER_NAME that is available on port 8443 from our docker image
-docker create -p 8443:8443 --name $CONTAINER_NAME $IMAGE_NAME
+#Create a container called node_app that is available on port 8443 from our docker image
+docker create -p 8443:8443 --name node_app $IMAGE_NAME
 #Write the private key to a file
 echo $PRIVATE_KEY > privatekey.pem
 #Write the server key to a fiile
 echo $SERVER > server.crt
-#Add the private key to the $CONTAINER_NAME docker container
-docker cp ./privatekey.pem $CONTAINER_NAME:/privatekey.pem
-#Add the server key to the $CONTAINER_NAME docker container
-docker cp ./server.crt $CONTAINER_NAME:/server.crt
-#Start the $CONTAINER_NAME container
-docker start $CONTAINER_NAME
+#Add the private key to the node_app docker container
+docker cp ./privatekey.pem node_app:/privatekey.pem
+#Add the server key to the node_app docker container
+docker cp ./server.crt node_app:/server.crt
+#Start the node_app container
+docker start node_app
